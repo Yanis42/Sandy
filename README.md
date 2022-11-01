@@ -1,8 +1,9 @@
 # Project Sandy
-Multi-Platform [AutoSplit](https://github.com/Toufool/Auto-Split) Images Renamer
-This program requires PyQt6, optional: install QDarkTheme to use a dark theme
+Multi-Platform [AutoSplit](https://github.com/Toufool/Auto-Split) Images Renamer.
 
-Tested under Python 3.10
+This program requires PyQt6, optional: install QDarkTheme to use a dark theme.
+
+Tested under Python 3.10.
 
 # Usage
 Before using this make sure:
