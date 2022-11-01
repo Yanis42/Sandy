@@ -1,7 +1,7 @@
 # Project Sandy
 Multi-Platform [AutoSplit](https://github.com/Toufool/Auto-Split) Images Renamer.
 
-This program requires PyQt6, optional: install QDarkTheme to use a dark theme.
+This program requires a LiveSplit split file (*.lss) and PyQt6, optional: QDarkTheme to use a dark theme.
 
 Tested under Python 3.10 but should work on any version that supports PyQt6.
 
@@ -12,7 +12,7 @@ Before using this make sure:
 
 After everything's ready:
 - Run ``src/main.py`` with Python (executable builds not available yet)
-- Open the split file (only used to get the split names)
+- Open the .lss split file (only used to get the split names)
 - Open the AutoSplit images directory
 - Set the global similarity (you'll need to adjust manually for now)
 - Set the global pause time (you'll need to adjust manually for now)
@@ -20,6 +20,6 @@ After everything's ready:
 
 # Features
 - Renames your AutoSplit images
-- Automatically add the mask ``{m}`` tag if the current image has transparency
+- Automatically add the mask ``{m}`` and dummy ``{d}`` flags if used
 
 ###### 'Time' > 'Hourglass' > 'Sand' > 'Sandy', because this little program saves some IRL time
