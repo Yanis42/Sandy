@@ -12,7 +12,13 @@ class MainWindow(QtWidgets.QMainWindow):
     def __init__(self):
         """Main initialisation function"""
         super(MainWindow, self).__init__()
-        load_ui.loadUi((path.dirname(path.abspath(__file__)) + "/../res/MainWindow.ui"), self)
+
+        uiPath = path.dirname(path.abspath(__file__)) + "/../res/MainWindow.ui"
+        if not path.isfile(uiPath):
+            # temp fix for executables
+            uiPath = uiPath.replace("/..", "")
+        load_ui.loadUi(uiPath, self)
+
         self.defaultDir = str(Path.home())
         self.initConnections()
 
