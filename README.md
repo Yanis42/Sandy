@@ -8,7 +8,7 @@ Tested under Python 3.10 but should work on any version that supports PyQt6.
 # Usage
 Before using this make sure:
 - Non-dummy splits are in the same order as your splits from LiveSplit
-- Dummy splits have ``dummy`` in the filename
+- Dummy splits have ``dummy`` in the filename (i.e.: ``001_dummy_splitname.png``)
 
 After everything's ready:
 - Run ``src/main.py`` with Python (executable builds not available yet)
@@ -21,6 +21,9 @@ After everything's ready:
 # Features
 - Renames your AutoSplit images
 - Automatically add the mask ``{m}`` and dummy ``{d}`` flags if used
+
+# Building
+This is not required to use this program, but if you want to build it run ``build.py``, the generated executable for your OS will be available in the ``dist`` folder (created when building)
 
 # Contributions are welcome!
 This project use Black to format the code properly
