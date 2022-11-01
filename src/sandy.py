@@ -1,4 +1,3 @@
-from multiprocessing import dummy
 from xml.etree import ElementTree as ET
 from os import walk, rename
 from PIL import Image
@@ -17,15 +16,23 @@ def getRoot(xmlPath: str):
 
 
 def getImageFiles(imgDirPath: str):
+    """Returns the list of images filenames inside the image folder"""
     files: list[str] = []
 
+    # get every filenames inside the folder
     for (dirPath, dirNames, fileNames) in walk(imgDirPath):
         files.extend(fileNames)
+
+    # make sure we keep PNGs
+    for file in files:
+        if ".png" not in file:
+            files.remove(file)
 
     return files
 
 
 def getSplitNames(lssRoot: ET.Element):
+    """Returns the split names from the given .LSS file"""
     names: list[str] = []
 
     if lssRoot is not None:
@@ -39,6 +46,7 @@ def getSplitNames(lssRoot: ET.Element):
 
 
 def hasImageTransparency(imgFilePath: str):
+    """Checks if the given image has transparency or not"""
     # https://stackoverflow.com/a/58567453
 
     img = Image.open(imgFilePath)
@@ -60,35 +68,36 @@ def hasImageTransparency(imgFilePath: str):
 
 
 def renameImages(xmlPath: str, imgDirPath: str, similarity: str, pauseTime: str):
+    """Changes every image filenames to the AutoSplit format"""
     lssRoot = getRoot(xmlPath)
 
     if lssRoot is not None:
-        imgPaths = getImageFiles(imgDirPath)
+        imgNames = getImageFiles(imgDirPath)
         splitNames = getSplitNames(lssRoot)
         lastName = splitNames.pop(0)
         dummyIdx = 0
         index = 1
 
-        for i, imgName in enumerate(imgPaths, 0):
+        for i, imgName in enumerate(imgNames, 0):
+            # get current image's path
             imgPath = f"{imgDirPath}/{imgName}"
-            maskTag = f"m" if hasImageTransparency(imgPath) else ""
-            dummyTag = f"d" if "dummy" in imgName else ""
-            flags = ("_{" + f"{maskTag}{dummyTag}" + "}") if maskTag != "" or dummyTag != "" else ""
 
-            # only update the name if the previous split is a real split
-            if i > 0 and "dummy" not in imgPaths[i - 1]:
+            # create the flag list
+            maskFlag = "m" if hasImageTransparency(imgPath) else ""
+            dummyFlag = "d" if "dummy" in imgName else ""
+            flags = ("_{" + f"{maskFlag}{dummyFlag}" + "}") if maskFlag != "" or dummyFlag != "" else ""
+
+            # only update the name and split number if the previous split is a real split
+            if i > 0 and "dummy" not in imgNames[i - 1]:
                 index += 1
                 lastName = splitNames.pop(0)
 
-            if "dummy" in imgPath:
+            splitName = lastName
+            if "dummy" in imgName:
+                # add the dummy number to the name if the current image is a dummy
                 dummyIdx += 1
                 splitName = f"d{dummyIdx}{lastName}"
-            else:
-                splitName = lastName
 
+            # create the new filename and rename the current file
             newName = f"{index:03}_{splitName}_({similarity})_[{pauseTime}]{flags}.png"
-
-            try:
-                rename(imgPath, f"{imgDirPath}/{newName}")
-            except FileExistsError:
-                rename(imgPath, f"{imgDirPath}/{newName.replace('.png', 'REMOVE_ME.png')}")
+            rename(imgPath, f"{imgDirPath}/{newName}")

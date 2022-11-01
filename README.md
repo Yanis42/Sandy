@@ -22,4 +22,8 @@ After everything's ready:
 - Renames your AutoSplit images
 - Automatically add the mask ``{m}`` and dummy ``{d}`` flags if used
 
+# Contributions are welcome!
+This project use Black to format the code properly
+
+
 ###### 'Time' > 'Hourglass' > 'Sand' > 'Sandy', because this little program saves some IRL time

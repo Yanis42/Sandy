@@ -13,16 +13,8 @@ class MainWindow(QtWidgets.QMainWindow):
         """Main initialisation function"""
         super(MainWindow, self).__init__()
         load_ui.loadUi((path.dirname(path.abspath(__file__)) + "/../res/MainWindow.ui"), self)
-        self.title = self.windowTitle()
         self.defaultDir = str(Path.home())
         self.initConnections()
-
-        # taskbar icon trick for Windows
-        if osName == "nt":
-            from ctypes import windll
-
-            # encoding probably useless but just in case
-            windll.shell32.SetCurrentProcessExplicitAppUserModelID("sandy.autosplit_rename".encode("UTF-8"))
 
     # connections callbacks
 
@@ -48,7 +40,7 @@ class MainWindow(QtWidgets.QMainWindow):
             self.splitPathLineEdit.text(),
             self.imagesPathLineEdit.text(),
             self.similarityLineEdit.text(),
-            self.pauseLineEdit.text()
+            self.pauseLineEdit.text(),
         )
 
     def initConnections(self):
