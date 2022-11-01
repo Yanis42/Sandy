@@ -3,7 +3,7 @@ Multi-Platform [AutoSplit](https://github.com/Toufool/Auto-Split) Images Renamer
 
 This program requires PyQt6, optional: install QDarkTheme to use a dark theme.
 
-Tested under Python 3.10.
+Tested under Python 3.10 but should work on any version that supports PyQt6.
 
 # Usage
 Before using this make sure:
