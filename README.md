@@ -11,6 +11,7 @@ Before using this make sure:
 - Dummy splits have ``dummy`` in the filename
 
 After everything's ready:
+- Run ``src/main.py`` with Python (executable builds not available yet)
 - Open the split file (only used to get the split names)
 - Open the AutoSplit images directory
 - Set the global similarity (you'll need to adjust manually for now)
