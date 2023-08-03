@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-from os import path, name as osName
+from os import name as osName
 from sys import executable
 from subprocess import run, PIPE
 
@@ -22,17 +22,12 @@ def getExcludedModules():
 
 
 def main():
-    # Probably not needed, excludes modules not needed by Cole
+    # Probably not needed, excludes modules not needed by Sandy
     # just in case they get included, which increase the size of the executable
     excludedModules = " ".join(getExcludedModules())
 
     # Windows seems to use a capitalized name for the PyInstaller module
-    try:
-        import pyinstaller
-
-        pyInstaller = "pyinstaller"
-    except ModuleNotFoundError:
-        pyInstaller = "PyInstaller"
+    pyInstaller = "PyInstaller" if osName == "nt" else "pyinstaller"
 
     dataArg = "--add-data=res:res"
     if osName == "nt":
