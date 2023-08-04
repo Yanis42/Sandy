@@ -42,7 +42,7 @@ class MainWindow(QtWidgets.QMainWindow, ConnectionCallbacks):
 
         return parser.parse_args()
 
-    #--- Connection Callbacks ---#
+    # --- Connection Callbacks ---#
 
     def initConnections(self):
         """Initialises the callbacks"""
