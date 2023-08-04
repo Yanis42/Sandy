@@ -26,7 +26,7 @@ def getRoot(xmlPath: str):
 
 def getImageFiles(imgDirPath: str):
     """Returns the list of images filenames inside the image folder"""
-    files: list[str] = []
+    files = []
 
     # get every filenames inside the folder
     for dirPath, dirNames, fileNames in walk(imgDirPath):
@@ -38,7 +38,7 @@ def getImageFiles(imgDirPath: str):
             files.remove(file)
 
     # at this point names with "dummy" comes after the real split, which is not what we want
-    sortedFiles = []
+    sortedFiles: list[str] = []
     for i, file in enumerate(sorted(files)):
         sortedFiles.append(file)
         if i > 0 and "dummy" in file:

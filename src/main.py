@@ -7,6 +7,7 @@ from sys import exit, argv
 from os import path
 from argparse import ArgumentParser as Parser
 from callbacks import ConnectionCallbacks
+from data import comparisonMethods
 
 
 class MainWindow(QtWidgets.QMainWindow, ConnectionCallbacks):
@@ -25,6 +26,9 @@ class MainWindow(QtWidgets.QMainWindow, ConnectionCallbacks):
 
         self.defaultDir = str(Path.home())
         self.imgList = None
+        self.splitPropertyList = None
+        self.activeProps = None
+        self.comparisonComboBox.addItems(comparisonMethods)
         self.initConnections()
 
     def getArguments(self):

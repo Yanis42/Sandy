@@ -1,6 +1,9 @@
 from dataclasses import dataclass
 
 
+comparisonMethods = ["L2 Norm", "Histogram", "Perc. Hash"]
+
+
 @dataclass
 class SplitFlagElement:
     index: int = 0
