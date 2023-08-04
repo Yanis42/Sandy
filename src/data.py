@@ -3,9 +3,9 @@ from dataclasses import dataclass
 
 @dataclass
 class SplitFlagElement:
-    index: int
-    splitName: str
-    outputName: str
+    index: int = 0
+    splitName: str = ""
+    outputName: str = ""
     isEnabled: bool = False
 
     def setFlag(self, index: int, splitName: str, outputName: str = "", isEnabled: bool = True):
@@ -19,34 +19,32 @@ class SplitFlagElement:
         return f"{self.outputName}{self.index}{self.splitName}" if self.isEnabled else f"{self.splitName}"
 
 
-@dataclass
 class SplitFlagSettings:
-    dummy = SplitFlagElement(0, "", "")
-    below = SplitFlagElement(0, "", "")
-    pause = SplitFlagElement(0, "", "")
-    isEnabled: bool = True
+    def __init__(self):
+        self.dummy = SplitFlagElement()
+        self.below = SplitFlagElement()
+        self.pause = SplitFlagElement()
 
     def getFlags(self):
         flags = []
 
-        if self.isEnabled:
-            if self.dummy is not None and self.dummy.isEnabled:
-                flags.append("d")
+        if self.dummy is not None and self.dummy.isEnabled:
+            flags.append("d")
 
-            if self.below is not None and self.below.isEnabled:
-                flags.append("b")
+        if self.below is not None and self.below.isEnabled:
+            flags.append("b")
 
-            if self.pause is not None and self.pause.isEnabled:
-                flags.append("p")
+        if self.pause is not None and self.pause.isEnabled:
+            flags.append("p")
 
         return "{" + "".join(flag for flag in flags) + "}" if len(flags) > 0 else ""
 
 
 @dataclass
 class SplitSettingElement:
-    splitName: str
-    tag: str
-    value: float
+    splitName: str = ""
+    tag: str = ""
+    value: float = 0.0
     isEnabled: bool = False
 
     valMin: float = None
@@ -68,19 +66,21 @@ class SplitSettingElement:
             )
 
 
-@dataclass
 class SplitSettings:
-    similarity = SplitSettingElement("", "", 0.0, valMin=0.0, valMax=1.0)
-    pauseTime = SplitSettingElement("", "", 0.0)
-    delayTime = SplitSettingElement("", "", 0.0)
-    comparisonMethod: SplitSettingElement = SplitSettingElement("", "", 0.0)
-    imgLoop = SplitSettingElement("", "", 0.0)
-    flags = SplitFlagSettings()
+    def __init__(self):
+        self.similarity = SplitSettingElement()
+        self.pauseTime = SplitSettingElement()
+        self.delayTime = SplitSettingElement()
+        self.comparisonMethod = SplitSettingElement()
+        self.imgLoop = SplitSettingElement()
+        self.flags = SplitFlagSettings()
 
     def getSettings(self):
         settings = []
 
         if self.similarity is not None and self.similarity.isEnabled:
+            self.similarity.valMin = 0.0
+            self.similarity.valMax = 1.0
             settings.append(self.similarity.getSetting())
 
         if self.pauseTime is not None and self.pauseTime.isEnabled:
@@ -95,8 +95,9 @@ class SplitSettings:
         if self.imgLoop is not None and self.imgLoop.isEnabled:
             settings.append(self.imgLoop.getSetting())
 
-        if self.flags is not None and self.flags.isEnabled:
-            settings.append(self.flags.getFlags())
+        flags = self.flags.getFlags()
+        if len(flags) > 0:
+            settings.append(flags)
 
         return "_".join(setting for setting in settings if len(setting) > 0) if len(settings) > 0 else ""
 

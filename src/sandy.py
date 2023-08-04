@@ -85,9 +85,9 @@ def renameImages(isDebugMode: bool, xmlPath: str, imgDirPath: str, similarity: s
 
             # create the new filename and rename the current file
             newName = SplitProperties(index, splitName, splitSettings).getSplitName()
-
             oldPath = f"{imgDirPath}/{imgName}"
             newPath = f"{imgDirPath}/{newName}"
+
             if isDebugMode:
                 print(f"Old Path: `{oldPath}`, New Path: `{newPath}`")
             else:
