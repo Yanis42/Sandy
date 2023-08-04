@@ -6,10 +6,10 @@ from pathlib import Path
 from sys import exit, argv
 from os import path
 from argparse import ArgumentParser as Parser
-from sandy import renameImages
+from callbacks import ConnectionCallbacks
 
 
-class MainWindow(QtWidgets.QMainWindow):
+class MainWindow(QtWidgets.QMainWindow, ConnectionCallbacks):
     def __init__(self):
         """Main initialisation function"""
         super(MainWindow, self).__init__()
@@ -24,11 +24,11 @@ class MainWindow(QtWidgets.QMainWindow):
         load_ui.loadUi(uiPath, self)
 
         self.defaultDir = str(Path.home())
+        self.imgList = None
         self.initConnections()
 
     def getArguments(self):
         """Initialisation of the argument parser"""
-
         parser = Parser(description="Fix various things related to assets for the OoT Decomp")
 
         parser.add_argument(
@@ -42,39 +42,39 @@ class MainWindow(QtWidgets.QMainWindow):
 
         return parser.parse_args()
 
-    # connections callbacks
-
-    def openSplitFile(self):
-        """Returns the splits file path"""
-        try:
-            fName = QtWidgets.QFileDialog.getOpenFileName(None, "Open Splits File", self.defaultDir, "*.lss")[0]
-            self.splitPathLineEdit.setText(fName)
-        except:
-            pass
-
-    def openImagesFolder(self):
-        """Returns the image folder path"""
-        try:
-            fName = QtWidgets.QFileDialog.getExistingDirectory(None, "Open Splits Images Folder", self.defaultDir)
-            self.imagesPathLineEdit.setText(fName)
-        except:
-            pass
-
-    def executeRename(self):
-        """Renames the images with the given informations"""
-        renameImages(
-            self.debugMode,
-            self.splitPathLineEdit.text(),
-            self.imagesPathLineEdit.text(),
-            self.similarityLineEdit.text(),
-            self.pauseLineEdit.text(),
-        )
+    #--- Connection Callbacks ---#
 
     def initConnections(self):
         """Initialises the callbacks"""
-        self.openSplitBtn.clicked.connect(self.openSplitFile)
-        self.openImagesBtn.clicked.connect(self.openImagesFolder)
-        self.renameBtn.clicked.connect(self.executeRename)
+
+        # General
+        self.openSplitBtn.clicked.connect(self.openSplitBtnOnUpdate)
+        self.openImagesBtn.clicked.connect(self.openImagesBtnOnUpdate)
+
+        # Simple Mode
+        self.renameBtn.clicked.connect(self.renameBtnOnUpdate)
+
+        # Advanced Mode
+        self.imagesPathLineEdit.textChanged.connect(self.imagesPathLineEditOnUpdate)
+
+        self.similarityCheckBox.stateChanged.connect(self.similarityCheckBoxOnUpdate)
+        self.pauseCheckBox.stateChanged.connect(self.pauseCheckBoxOnUpdate)
+        self.delayCheckBox.stateChanged.connect(self.delayCheckBoxOnUpdate)
+        self.comparisonCheckBox.stateChanged.connect(self.comparisonCheckBoxOnUpdate)
+        self.loopCheckBox.stateChanged.connect(self.loopCheckBoxOnUpdate)
+
+        self.similarityValue.valueChanged.connect(self.similarityValueOnUpdate)
+        self.pauseValue.valueChanged.connect(self.pauseValueOnUpdate)
+        self.delayValue.valueChanged.connect(self.delayValueOnUpdate)
+        self.comparisonComboBox.currentTextChanged.connect(self.comparisonComboBoxOnUpdate)
+        self.loopValue.valueChanged.connect(self.loopValueOnUpdate)
+
+        self.dummyFlagCheckBox.stateChanged.connect(self.dummyFlagCheckBoxOnUpdate)
+        self.belowFlagCheckBox.stateChanged.connect(self.belowFlagCheckBoxOnUpdate)
+        self.pauseFlagCheckBox.stateChanged.connect(self.pauseFlagCheckBoxOnUpdate)
+
+        self.exportFolderBtn.clicked.connect(self.exportFolderBtnOnUpdate)
+        self.exportBtn.clicked.connect(self.exportBtnOnUpdate)
 
 
 # start the app

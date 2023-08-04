@@ -1,6 +1,15 @@
+from PyQt6 import QtWidgets
 from xml.etree import ElementTree as ET
 from os import walk, rename
 from data import SplitProperties, SplitSettings
+
+
+def showErrorMessage(parent, msg: str):
+    errorDialog = QtWidgets.QMessageBox(parent)
+    errorDialog.setWindowTitle("Sandy - Error")
+    errorDialog.setIcon(QtWidgets.QMessageBox.Icon.Critical)
+    errorDialog.setText(msg)
+    errorDialog.show()
 
 
 def getRoot(xmlPath: str):
@@ -53,12 +62,12 @@ def getSplitNames(lssRoot: ET.Element):
     return names
 
 
-def renameImages(isDebugMode: bool, xmlPath: str, imgDirPath: str, similarity: str, pauseTime: str):
+def renameImages(isDebugMode: bool, xmlPath: str, imgDirPath: str, imgList: list[str], similarity: str, pauseTime: str):
     """Changes every image filenames to the AutoSplit format"""
     lssRoot = getRoot(xmlPath)
 
     if lssRoot is not None:
-        imgNames = getImageFiles(imgDirPath)
+        imgNames = imgList
         splitNames = getSplitNames(lssRoot)
         lastName = splitNames.pop(0)
         dummyIdx = 0
