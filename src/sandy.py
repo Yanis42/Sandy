@@ -1,6 +1,6 @@
 from xml.etree import ElementTree as ET
 from os import walk, rename
-from PIL import Image
+from data import SplitProperties, SplitSettings
 
 
 def getRoot(xmlPath: str):
@@ -20,7 +20,7 @@ def getImageFiles(imgDirPath: str):
     files: list[str] = []
 
     # get every filenames inside the folder
-    for (dirPath, dirNames, fileNames) in walk(imgDirPath):
+    for dirPath, dirNames, fileNames in walk(imgDirPath):
         files.extend(fileNames)
 
     # make sure we keep PNGs
@@ -28,7 +28,15 @@ def getImageFiles(imgDirPath: str):
         if ".png" not in file:
             files.remove(file)
 
-    return files
+    # at this point names with "dummy" comes after the real split, which is not what we want
+    sortedFiles = []
+    for i, file in enumerate(sorted(files)):
+        sortedFiles.append(file)
+        if i > 0 and "dummy" in file:
+            sortedFiles.remove(file)
+            sortedFiles.insert(i - 1, file)
+
+    return sortedFiles
 
 
 def getSplitNames(lssRoot: ET.Element):
@@ -45,29 +53,7 @@ def getSplitNames(lssRoot: ET.Element):
     return names
 
 
-def hasImageTransparency(imgFilePath: str):
-    """Checks if the given image has transparency or not"""
-    # https://stackoverflow.com/a/58567453
-
-    img = Image.open(imgFilePath)
-
-    if img.info.get("transparency", None) is not None:
-        return True
-
-    if img.mode == "P":
-        transparent = img.info.get("transparency", -1)
-
-        for _, index in img.getcolors():
-            if index == transparent:
-                return True
-    elif img.mode == "RGBA":
-        if img.getextrema()[3][0] < 255:
-            return True
-
-    return False
-
-
-def renameImages(xmlPath: str, imgDirPath: str, similarity: str, pauseTime: str):
+def renameImages(isDebugMode: bool, xmlPath: str, imgDirPath: str, similarity: str, pauseTime: str):
     """Changes every image filenames to the AutoSplit format"""
     lssRoot = getRoot(xmlPath)
 
@@ -79,25 +65,30 @@ def renameImages(xmlPath: str, imgDirPath: str, similarity: str, pauseTime: str)
         index = 1
 
         for i, imgName in enumerate(imgNames, 0):
-            # get current image's path
-            imgPath = f"{imgDirPath}/{imgName}"
-
-            # create the flag list
-            maskFlag = "m" if hasImageTransparency(imgPath) else ""
-            dummyFlag = "d" if "dummy" in imgName else ""
-            flags = ("_{" + f"{maskFlag}{dummyFlag}" + "}") if maskFlag != "" or dummyFlag != "" else ""
+            # init split settings
+            splitSettings = SplitSettings()
 
             # only update the name and split number if the previous split is a real split
             if i > 0 and "dummy" not in imgNames[i - 1]:
                 index += 1
                 lastName = splitNames.pop(0)
-
             splitName = lastName
+
+            # create the flag list and add the dummy number to the name if the current image is a dummy
             if "dummy" in imgName:
-                # add the dummy number to the name if the current image is a dummy
                 dummyIdx += 1
-                splitName = f"d{dummyIdx}{lastName}"
+                splitSettings.flags.dummy.setFlag(dummyIdx, lastName, "d")
+                splitName = splitSettings.flags.dummy.getName()  # returns the split name if not enabled
+
+            splitSettings.similarity.setSetting(splitName, "(,)", float(similarity))
+            splitSettings.pauseTime.setSetting(splitName, "[,]", float(pauseTime))
 
             # create the new filename and rename the current file
-            newName = f"{index:03}_{splitName}_({similarity})_[{pauseTime}]{flags}.png"
-            rename(imgPath, f"{imgDirPath}/{newName}")
+            newName = SplitProperties(index, splitName, splitSettings).getSplitName()
+
+            oldPath = f"{imgDirPath}/{imgName}"
+            newPath = f"{imgDirPath}/{newName}"
+            if isDebugMode:
+                print(f"Old Path: `{oldPath}`, New Path: `{newPath}`")
+            else:
+                rename(oldPath, newPath)
