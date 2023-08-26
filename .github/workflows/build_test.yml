@@ -14,7 +14,7 @@ jobs:
     steps:
     - name: Create Release
       id: create_release
-      uses: actions/create-release@v2
+      uses: actions/create-release@v1
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
@@ -25,7 +25,7 @@ jobs:
     - name: Output Release URL File
       run: echo "${{ steps.create_release.outputs.upload_url }}" > release_url.txt
     - name: Save Release URL File for publish
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v1
       with:
         name: release_url
         path: release_url.txt
@@ -51,9 +51,9 @@ jobs:
             OUT_FILE_NAME: Sandy.exe
             ASSET_MIME: application/vnd.microsoft.portable-executable
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v1
     - name: Set up Python 3.7
-      uses: actions/setup-python@v2
+      uses: actions/setup-python@v1
       with:
         python-version: 3.7
     - name: Install dependencies
@@ -63,7 +63,7 @@ jobs:
     - name: Build with pyinstaller for ${{matrix.TARGET}}
       run: ${{matrix.CMD_BUILD}}
     - name: Load Release URL File from release job
-      uses: actions/download-artifact@v2
+      uses: actions/download-artifact@v1
       with:
         name: release_url
     - name: Get Release File Name & Upload URL
@@ -74,7 +74,7 @@ jobs:
         echo ::set-output name=upload_url::$value        
     - name: Upload Release Asset
       id: upload-release-asset
-      uses: actions/upload-release-asset@v2
+      uses: actions/upload-release-asset@v1
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
