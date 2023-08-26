@@ -12,8 +12,6 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        program:
-        - Sandy
         include:
           # - os: macos-latest
           #   TARGET: macos
@@ -26,7 +24,7 @@ jobs:
           - os: windows-latest
             TARGET: windows
             CMD_BUILD: PyInstaller -F -w -n Sandy src/main.py
-            OUT_FILE_NAME: ${{ matrix.program }}.exe
+            OUT_FILE_NAME: Sandy.exe
             ASSET_MIME: application/vnd.microsoft.portable-executable
     steps:
     - uses: actions/checkout@v1
