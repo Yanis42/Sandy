@@ -61,7 +61,8 @@ class SplitSettingElement:
 
     def getSetting(self):
         if (self.valMin is None and self.valMax is None) or (self.value >= self.valMin and self.value <= self.valMax):
-            return f"{self.tag.split(',')[0]}{self.value}{self.tag.split(',')[1]}"  # i.e.: ``(0.95)``
+            value = int(self.value) if "(" not in self.tag else self.value
+            return f"{self.tag.split(',')[0]}{value}{self.tag.split(',')[1]}"  # i.e.: ``(0.95)``
         else:
             raise ValueError(
                 f"ERROR: The threshold value for Split `{self.splitName}` isn't between "

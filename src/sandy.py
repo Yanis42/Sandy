@@ -3,6 +3,10 @@ from xml.etree import ElementTree as ET
 from os import walk, rename
 from data import SplitProperties, SplitSettings
 
+from typing import TYPE_CHECKING
+if TYPE_CHECKING:
+    from callbacks import ConnectionCallbacks
+
 
 def showErrorMessage(parent, msg: str):
     errorDialog = QtWidgets.QMessageBox(parent)
@@ -62,12 +66,21 @@ def getSplitNames(lssRoot: ET.Element):
     return names
 
 
-def renameImages(isDebugMode: bool, xmlPath: str, imgDirPath: str, imgList: list[str], similarity: str, pauseTime: str):
+def renameImage(imgDirPath: str, oldName: str, newName: str, isDebugMode: bool):
+    oldPath = f"{imgDirPath}/{oldName}"
+    newPath = f"{imgDirPath}/{newName}"
+
+    if isDebugMode:
+        print(f"Old Path: `{oldPath}`, New Path: `{newPath}`")
+    else:
+        rename(oldPath, newPath)
+
+
+def renameImages(isDebugMode: bool, xmlPath: str, imgDirPath: str, imgNames: list[str], similarity: str, pauseTime: str):
     """Changes every image filenames to the AutoSplit format"""
     lssRoot = getRoot(xmlPath)
 
     if lssRoot is not None:
-        imgNames = imgList
         splitNames = getSplitNames(lssRoot)
         lastName = splitNames.pop(0)
         dummyIdx = 0
@@ -94,10 +107,14 @@ def renameImages(isDebugMode: bool, xmlPath: str, imgDirPath: str, imgList: list
 
             # create the new filename and rename the current file
             newName = SplitProperties(index, splitName, splitSettings).getSplitName()
-            oldPath = f"{imgDirPath}/{imgName}"
-            newPath = f"{imgDirPath}/{newName}"
+            renameImage(imgDirPath, imgName, newName, isDebugMode)
 
-            if isDebugMode:
-                print(f"Old Path: `{oldPath}`, New Path: `{newPath}`")
-            else:
-                rename(oldPath, newPath)
+
+def fixImageIndices(self: "ConnectionCallbacks", imgDirPath: str, imgNames: list[str], isDebugMode: bool):
+    for i, imgName in enumerate(imgNames, 1):
+        oldImgName = imgName
+        split = oldImgName.split("_")
+        imgName = f"{i:03}" + imgName.removeprefix(split[0])
+
+        self.updateCache(oldImgName, imgName)
+        renameImage(imgDirPath, oldImgName, imgName, isDebugMode)

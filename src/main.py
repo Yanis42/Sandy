@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 from PyQt6 import QtWidgets
+from PyQt6.QtGui import QPixmap
 from PyQt6.uic import load_ui
 from pathlib import Path
 from sys import exit, argv
@@ -29,7 +30,13 @@ class MainWindow(QtWidgets.QMainWindow, ConnectionCallbacks):
         self.splitPropertyList = None
         self.activeProps = None
         self.comparisonComboBox.addItems(comparisonMethods)
+        self.modelCache: list[tuple[bool, str, QPixmap]] = []
+        self.allowUpdate = False
         self.initConnections()
+
+        if self.debugMode:
+            self.splitPathLineEdit.setText("/home/yanis/sandy_test.lss")
+            self.imagesPathLineEdit.setText("/home/github/Sandy/test/processed")
 
     def getArguments(self):
         """Initialisation of the argument parser"""
@@ -54,6 +61,9 @@ class MainWindow(QtWidgets.QMainWindow, ConnectionCallbacks):
         # General
         self.openSplitBtn.clicked.connect(self.openSplitBtnOnUpdate)
         self.openImagesBtn.clicked.connect(self.openImagesBtnOnUpdate)
+
+        # Tools
+        self.fixImgIndicesBtn.clicked.connect(self.fixImgIndicesBtnOnUpdate)
 
         # Simple Mode
         self.renameBtn.clicked.connect(self.renameBtnOnUpdate)

@@ -25,6 +25,9 @@
   <property name="windowTitle">
    <string>Sandy - Autosplit Helper</string>
   </property>
+  <property name="documentMode">
+   <bool>false</bool>
+  </property>
   <widget class="QWidget" name="centralwidget">
    <widget class="QTabWidget" name="tabWidget">
     <property name="enabled">
@@ -65,6 +68,9 @@
         <layout class="QFormLayout" name="formLayout_2">
          <item row="1" column="1">
           <widget class="QDoubleSpinBox" name="similarityValue">
+           <property name="enabled">
+            <bool>false</bool>
+           </property>
            <property name="prefix">
             <string/>
            </property>
@@ -78,6 +84,9 @@
          </item>
          <item row="2" column="1">
           <widget class="QSpinBox" name="pauseValue">
+           <property name="enabled">
+            <bool>false</bool>
+           </property>
            <property name="maximum">
             <number>999999999</number>
            </property>
@@ -87,10 +96,20 @@
           </widget>
          </item>
          <item row="4" column="1">
-          <widget class="QComboBox" name="comparisonComboBox"/>
+          <widget class="QComboBox" name="comparisonComboBox">
+           <property name="enabled">
+            <bool>false</bool>
+           </property>
+          </widget>
          </item>
          <item row="5" column="1">
           <widget class="QSpinBox" name="loopValue">
+           <property name="enabled">
+            <bool>false</bool>
+           </property>
+           <property name="minimum">
+            <number>1</number>
+           </property>
            <property name="maximum">
             <number>999999999</number>
            </property>
@@ -133,6 +152,9 @@
          </item>
          <item row="3" column="1">
           <widget class="QSpinBox" name="delayValue">
+           <property name="enabled">
+            <bool>false</bool>
+           </property>
            <property name="maximum">
             <number>999999999</number>
            </property>
@@ -285,6 +307,24 @@
         </widget>
        </item>
       </layout>
+     </widget>
+    </widget>
+    <widget class="QWidget" name="modeTools">
+     <attribute name="title">
+      <string>Tools</string>
+     </attribute>
+     <widget class="QPushButton" name="fixImgIndicesBtn">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>10</y>
+        <width>151</width>
+        <height>31</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Fix Image Indices</string>
+      </property>
      </widget>
     </widget>
    </widget>

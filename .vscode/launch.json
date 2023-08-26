@@ -11,6 +11,14 @@
             "justMyCode": true
         },
         {
+            "name": "Release",
+            "type": "python",
+            "request": "launch",
+            "program": "src/main.py",
+            "console": "integratedTerminal",
+            "justMyCode": true
+        },
+        {
             "name": "Build",
             "type": "python",
             "request": "launch",

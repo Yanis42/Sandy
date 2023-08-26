@@ -1,7 +1,7 @@
 from PyQt6 import QtWidgets
 from PyQt6.QtGui import QPixmap
 from PyQt6.QtCore import Qt, QAbstractListModel
-from sandy import renameImages, getImageFiles, showErrorMessage
+from sandy import renameImages, getImageFiles, showErrorMessage, fixImageIndices
 from data import SplitProperties, SplitSettings
 
 
@@ -11,15 +11,13 @@ class ListViewModel(QAbstractListModel):
         self.items = items
 
     def data(self, index, role):
-        status, text, imgPath = self.items[index.row()]
+        status, text, img = self.items[index.row()]
 
         if role == Qt.ItemDataRole.DisplayRole:
             return text
 
         if role == Qt.ItemDataRole.DecorationRole:
             if status:
-                img = QPixmap(imgPath)
-                img = img.scaledToHeight(64)
                 return img
 
     def rowCount(self, index):
@@ -28,6 +26,36 @@ class ListViewModel(QAbstractListModel):
 
 class ConnectionCallbacks:
     # General
+
+    def updateCache(self, oldText: str, newText: str):
+        cache = self.modelCache
+
+        for i, elem in enumerate(cache):
+            if elem[1] == oldText:
+                cache[i] = (elem[0], newText, elem[2])
+                break
+
+        self.modelCache = cache
+        self.imgListView.update()
+
+    def updateText(self, tag: list[str], value: str):
+        oldText = self.modelCache[self.activeProps.index - 1][1]
+        split = oldText.removesuffix(".png").split("_")
+        for elem in split:
+            if value is None:
+                text = ""
+            else:
+                text = tag[0] + value + tag[1]
+
+            if elem.startswith(tag[0]) and elem.endswith(tag[1]):
+                newText = oldText.replace(elem, text)
+                self.updateCache(oldText, newText)
+                break
+
+            if tag[0] not in elem and tag[1] not in elem:
+                self.updateCache(oldText, oldText + "_" + text)
+                break
+
 
     def openSplitBtnOnUpdate(self):
         """Returns the splits file path"""
@@ -42,6 +70,13 @@ class ConnectionCallbacks:
         try:
             fName = QtWidgets.QFileDialog.getExistingDirectory(None, "Open Splits Images Folder", self.defaultDir)
             self.imagesPathLineEdit.setText(fName)
+        except Exception as e:
+            showErrorMessage(self, f"An error occurred: {e}")
+
+    # Tools
+    def fixImgIndicesBtnOnUpdate(self):
+        try:
+            fixImageIndices(self, self.imagesPathLineEdit.text(), self.imgList, self.debugMode)
         except Exception as e:
             showErrorMessage(self, f"An error occurred: {e}")
 
@@ -71,7 +106,10 @@ class ConnectionCallbacks:
                 raise RuntimeError("No image were found in this folder.")
 
             modelItems = [(True, imgName, f"{self.imagesPathLineEdit.text()}/{imgName}") for imgName in self.imgList]
-            self.imgListView.setModel(ListViewModel(modelItems))
+            for elem in modelItems:
+                img = QPixmap(elem[2]).scaledToHeight(64)
+                self.modelCache.append((elem[0], elem[1], img))
+            self.imgListView.setModel(ListViewModel(self.modelCache))
 
             # we need to set the connection there instead of the main connections init function
             model = self.imgListView.selectionModel()
@@ -89,7 +127,11 @@ class ConnectionCallbacks:
                     imgElems = img.split("_")
                     name = imgElems[1] if "dummy" not in img else f"{imgElems[1]}_{imgElems[2]}"
                     name = name.removesuffix(".png")
-                    splitProperties = SplitProperties(int(imgElems[0]), name, SplitSettings())
+                    try:
+                        index = int(imgElems[0])
+                    except ValueError:
+                        index = -1
+                    splitProperties = SplitProperties(index, name, SplitSettings())
 
                     settings = splitProperties.settings
                     for elem in imgElems:
@@ -105,7 +147,7 @@ class ConnectionCallbacks:
                             settings.delayTime.setSetting(splitProperties.name, "#,#", float(elem[1:][:-1]))
 
                         if elem.startswith("^") and elem.endswith("^"):
-                            settings.comparisonMethod.setSetting(splitProperties.name, "^,^", float(elem[1:][:-1]))
+                            settings.comparisonMethod.setSetting(splitProperties.name, "^,^", float(elem[1:][:-1]) - 1.0)
 
                         if elem.startswith("@") and elem.endswith("@"):
                             settings.imgLoop.setSetting(splitProperties.name, "@,@", float(elem[1:][:-1]))
@@ -124,7 +166,6 @@ class ConnectionCallbacks:
                                 settings.flags.pause.setFlag(pauseIdx, splitProperties.name, "p")
 
                     self.splitPropertyList.append(splitProperties)
-                self.activeSplitProperties = self.splitPropertyList[0]
         except Exception as e:
             showErrorMessage(self, f"An error occurred: {e}")
 
@@ -168,34 +209,69 @@ class ConnectionCallbacks:
     # Settings
 
     def similarityCheckBoxOnUpdate(self):
-        pass
+        state = True if self.similarityCheckBox.checkState() == Qt.CheckState.Checked else False
+        self.similarityValue.setEnabled(state)
+        self.activeProps.settings.similarity.isEnabled = state
+        if state:
+            self.similarityValueOnUpdate()
+        else:
+            self.updateText(["(", ")"], None)
 
     def pauseCheckBoxOnUpdate(self):
-        pass
+        state = True if self.pauseCheckBox.checkState() == Qt.CheckState.Checked else False
+        self.pauseValue.setEnabled(state)
+        self.activeProps.settings.pauseTime.isEnabled = state
+        if state:
+            self.pauseValueOnUpdate()
+        else:
+            self.updateText(["[", "]"], None)
 
     def delayCheckBoxOnUpdate(self):
-        pass
+        state = True if self.delayCheckBox.checkState() == Qt.CheckState.Checked else False
+        self.delayValue.setEnabled(state)
+        self.activeProps.settings.delayTime.isEnabled = state
+        if state:
+            self.delayValueOnUpdate()
+        else:
+            self.updateText(["#", "#"], None)
 
     def comparisonCheckBoxOnUpdate(self):
-        pass
+        state = True if self.comparisonCheckBox.checkState() == Qt.CheckState.Checked else False
+        self.comparisonComboBox.setEnabled(state)
+        self.activeProps.settings.comparisonMethod.isEnabled = state
+        if state:
+            self.comparisonComboBoxOnUpdate()
+        else:
+            self.updateText(["^", "^"], None)
 
     def loopCheckBoxOnUpdate(self):
-        pass
+        state = True if self.loopCheckBox.checkState() == Qt.CheckState.Checked else False
+        self.loopValue.setEnabled(state)
+        self.activeProps.settings.imgLoop.isEnabled = state
+        if state:
+            self.loopValueOnUpdate()
+        else:
+            self.updateText(["@", "@"], None)
 
     def similarityValueOnUpdate(self):
-        pass
+        self.activeProps.settings.similarity.value = round(self.similarityValue.value(), 2)
+        self.updateText(["(", ")"], f"{self.activeProps.settings.similarity.value:.2f}")
 
     def pauseValueOnUpdate(self):
-        pass
+        self.activeProps.settings.pauseTime.value = self.pauseValue.value()
+        self.updateText(["[", "]"], f"{int(self.activeProps.settings.pauseTime.value)}")
 
     def delayValueOnUpdate(self):
-        pass
+        self.activeProps.settings.delayTime.value = self.delayValue.value()
+        self.updateText(["#", "#"], f"{int(self.activeProps.settings.delayTime.value)}")
 
     def comparisonComboBoxOnUpdate(self):
-        pass
+        self.activeProps.settings.comparisonMethod.value = self.comparisonComboBox.currentIndex()
+        self.updateText(["^", "^"], f"{int(self.activeProps.settings.comparisonMethod.value)}")
 
     def loopValueOnUpdate(self):
-        pass
+        self.activeProps.settings.imgLoop.value = self.loopValue.value()
+        self.updateText(["@", "@"], f"{int(self.activeProps.settings.imgLoop.value)}")
 
     # Flags
 
