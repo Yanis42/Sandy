@@ -38,12 +38,12 @@ jobs:
         include:
           - os: ubuntu-latest
             TARGET: Linux
-            CMD_BUILD: pyinstaller -F -w -n Sandy src/main.py && cd dist/ && zip -r9 Sandy_Ubuntu Sandy
+            CMD_BUILD: pyinstaller -F -w -n Sandy --add-data=res:res src/main.py && cd dist/ && zip -r9 Sandy_Ubuntu Sandy
             OUT_FILE_NAME: Sandy_Ubuntu.zip
             ASSET_MIME: application/zip
           - os: windows-latest
             TARGET: Windows
-            CMD_BUILD: PyInstaller -F -w -n Sandy_Windows src/main.py
+            CMD_BUILD: PyInstaller -F -w -n Sandy_Windows --add-data=res;res src/main.py
             OUT_FILE_NAME: Sandy_Windows.exe
             ASSET_MIME: application/vnd.microsoft.portable-executable
 
