@@ -43,7 +43,7 @@ jobs:
             ASSET_MIME: application/zip
           - os: windows-latest
             TARGET: Windows
-            CMD_BUILD: PyInstaller -F -w -n Sandy src/main.py
+            CMD_BUILD: PyInstaller -F -w -n Sandy_Windows src/main.py
             OUT_FILE_NAME: Sandy_Windows.exe
             ASSET_MIME: application/vnd.microsoft.portable-executable
 
